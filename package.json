@@ -1,4 +1,5 @@
 {
+  "homepage" : "https://ono36.github.io/othello/",
   "name": "myapp",
   "version": "0.1.0",
   "private": true,
