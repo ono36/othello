@@ -1,0 +1,87 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+ol,
+ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #395;
+  border: 1px solid #000;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+  box-sizing: border-box;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+
+.square {
+  width: 12%;
+  height: 12%;
+}
+.board-row {
+  width: 256px;
+  height: 256px;
+}
+
+.circle {
+  padding: 0;
+  margin: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+}
+.square.enable .circle.turn1 {
+  background-color: black;
+  opacity: 0.3;
+}
+.square.enable .circle.turn2 {
+  background-color: white;
+  opacity: 0.3;
+}
+.square.enable {
+  border: 2px solid rgb(154, 216, 152);
+}
+.circle.black {
+  background-color: black;
+}
+.circle.white {
+  background-color: white;
+}
+
