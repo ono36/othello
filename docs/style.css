@@ -67,6 +67,9 @@ ul {
   height: 80%;
   border-radius: 50%;
 }
+.square.before{
+  border: 1px solid rgb(255, 0, 0);
+}
 .square.enable .circle.turn1 {
   background-color: black;
   opacity: 0.3;
