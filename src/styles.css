@@ -67,16 +67,20 @@ ul {
   height: 80%;
   border-radius: 50%;
 }
+
+.square.enable .circle{
+  opacity: 0.2;
+  margin: 40%;
+  width: 20%;
+  height: 20%;
+}
 .square.enable .circle.turn1 {
   background-color: black;
-  opacity: 0.3;
 }
 .square.enable .circle.turn2 {
   background-color: white;
-  opacity: 0.3;
 }
 .square.enable {
-  border: 2px solid rgb(154, 216, 152);
 }
 .circle.black {
   background-color: black;
@@ -85,3 +89,6 @@ ul {
   background-color: white;
 }
 
+.square.before{
+  border: 2px solid rgb(255, 0, 0);
+}

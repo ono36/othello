@@ -4,7 +4,12 @@ import "./styles.css";
 
 var _squares;
 var turn = 1;
+var mode = 0;
 var board;
+var winner=0;
+var before=-1;
+var interval=0;
+
 class Square extends React.Component {
   render() {
     var a = "";
@@ -14,9 +19,15 @@ class Square extends React.Component {
       a = "white";
     }
     var css = "turn" + turn;
-    if (this.props.enable) {
-      css += " enable";
+    if ((mode == 0 ||  turn == 1) ){
+		//人のターンならマーカー表示
+		if (this.props.enable) {
+		  css += " enable";
+		}
     }
+	if (this.props.before) {
+		  css += " before";
+	}
     return (
       <div className={`square ${css}`} onClick={() => this.props.onClick()}>
         <p className={`circle ${a} turn${turn}`} />
@@ -25,12 +36,17 @@ class Square extends React.Component {
   }
 }
 function reset() {
+	before=-1;
+
   _squares.fill(0);
   _squares[8 * 3 + 3] = 1;
   _squares[8 * 4 + 4] = 1;
   _squares[8 * 3 + 4] = 2;
   _squares[8 * 4 + 3] = 2;
   turn = 1;
+  var combo = document.getElementById("mode");
+  mode = parseInt(combo.value);
+  console.log(mode);
   board.forceUpdate();
 }
 class Board extends React.Component {
@@ -44,29 +60,125 @@ class Board extends React.Component {
     board = this;
     reset();
   }
+  
   handleClick(i) {
     const squares = this.state.squares;
-    if (calculateWinner(squares) || squares[i]) {
+    if ( squares[i]) {
       return;
     }
     var color = turn;
     if (!check(i, color, squares)) {
+		//置けないなら無視
       return;
     }
 
+    if (mode != 0 && turn == 2){
+		//CPUのターンなら無視
+    	return;
+    }
+	this.put(i);
+
+  }
+  put(i){
+	  interval=1;
+	  window.setTimeout(()=>{
+			  interval=0;
+  board.forceUpdate();
+			  },1000);
+    var color = turn;
+	before=i;
+	var squares = this.state.squares;
     check(i, color, squares, true);
     squares[i] = color;
 
     this.setState({
       squares: squares
     });
-    turn = 3 - turn;
+
+	//次置けるかチェック
+	var enable=false;
+    for (let i = 0; i < 8 * 8; i++) {
+      if(check(i,3-turn,this.state.squares)){
+		  enable=true;
+		  break;
+	  }
+    }
+
+	//置ける場合はターン交代する
+	if(enable){
+		//ターン交代
+		turn = 3 - turn;
+	}else{
+		//置け場合はターン交代しない
+
+		//再度置ける過チェック
+		enable=false;
+		for (let i = 0; i < 8 * 8; i++) {
+		  if(check(i,turn,this.state.squares)){
+			  enable=true;
+			  break;
+		  }
+		}
+
+		if(!enable){
+			//置け無い場合は終了
+			window.setTimeout(this.end,100);
+		}
+	}
+    if (mode != 0 && turn == 2){
+		//CPUのターンならCPU呼ぶ
+		window.setTimeout(()=>{this.cpu()},1000);
+    	return;
+    }
+  }
+
+  cpu(){
+	  var enables=[];
+	for (let i = 0; i < 8 * 8; i++) {
+	  var count=check(i,turn,_squares);
+	  if(count){
+		  enables.push({pos:i,count:count});
+	  }
+	}
+	enables.sort((a,b)=>{
+			return a.count-b.count;
+			});
+	var target=enables[0].pos;
+	  switch(mode){
+	 case 1:
+		 var random = (Math.random()*enables.length)|0;
+		 target= enables[random].pos;
+		 break;
+	 case 2:
+		 target= enables[0].pos;
+		 break;
+	 case 3:
+		 target = enables[enables.length-1].pos;
+		 break;
+	  }
+	this.put(target);
+  }
+  end(){
+       var black=count(1);
+       var white=count(2);
+	   var msg="引き分け";
+	   if(black<white){
+		   msg="白の勝ち";
+		   winner=2;
+	   }
+	   if(white<black){
+		   msg="黒の勝ち";
+		   winner=1;
+	   }
+		alert(msg);
+  		board.forceUpdate();
   }
   renderSquare(i) {
     var color = turn;
     return (
       <Square
         enable={check(i, color, this.state.squares)}
+        before={i==before}
         value={this.state.squares[i]}
         key={i}
         onClick={() => this.handleClick(i)}
@@ -75,16 +187,16 @@ class Board extends React.Component {
   }
 
   render() {
-    const winner = calculateWinner(this.state.squares);
     let status;
     if (winner) {
-      status = "Winner: " + winner;
+      status = "Winner: "  + (winner === 1 ? "黒" : "白");
     } else {
       status = "Next player: " + (turn === 1 ? "黒" : "白");
     }
     const items = [];
     for (let i = 0; i < 8 * 8; i++) {
-      items.push(this.renderSquare(i));
+      var square =this.renderSquare(i);
+      items.push(square);
     }
     //個数カウント
 
@@ -120,27 +232,27 @@ class Game extends React.Component {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
 
-function calculateWinner(squares) {
-  return null;
-}
+
+//置ける場所かどうか判定(change=true)で実際に置く)
 function check(i, color, squares, change) {
   var x = i % 8;
   var y = (i / 8) | 0;
   if (squares[i] !== 0) {
-    return false;
+    return 0;
   }
 
-  var result = false;
+  var count=0;
   //左
   for (var ax = -1; ax < 2; ax++) {
     for (var ay = -1; ay < 2; ay++) {
       if (ax === 0 && ay === 0) {
         continue;
       }
-      result |= search(x, y, ax, ay, color, squares, change);
+      var result =  search(x, y, ax, ay, color, squares, change);
+	  count+=result;
     }
   }
-  return result;
+  return count;
 }
 
 function count(color) {
@@ -156,18 +268,19 @@ function count(color) {
   return num;
 }
 function search(x, y, ax, ay, color, squares, change) {
+	var count=0;
   for (var i = 0; 1; i++) {
     x += ax;
     y += ay;
     if (x < 0 || x >= 8 || y < 0 || y >= 8) {
-      return false;
+		break;
     }
     if (squares[x + y * 8] === 0) {
-      return false;
+		break;
     }
     if (squares[x + y * 8] === color) {
       if (i === 0) {
-        return false;
+		  break;
       }
       if (change) {
         for (var j = 0; j < i + 1; j++) {
@@ -176,9 +289,10 @@ function search(x, y, ax, ay, color, squares, change) {
           y -= ay;
         }
       }
-      return true;
+	  return i;
     }
   }
+  return 0;
 }
 
 document.getElementById("reset").addEventListener("click", function () {
