@@ -19,6 +19,7 @@ ul {
 }
 
 .square {
+  position: relative;
   background: #395;
   border: 1px solid #000;
   float: left;
@@ -60,12 +61,28 @@ ul {
   height: 256px;
 }
 
-.circle {
+.circle{
   padding: 0;
-  margin: 10%;
   width: 80%;
   height: 80%;
+  margin: 10%;
   border-radius: 50%;
+}
+.square:not(.enable) .white.circle
+,.square:not(.enable) .black.circle{
+     animation: hoge 0.2s  ease-out;
+}
+@keyframes hoge{
+	0%{
+  width: 0%;
+  height: 0%;
+  margin: 50%;
+	}
+	100%{
+  width: 80%;
+  height: 80%;
+  margin: 10%;
+	}
 }
 
 .square.enable .circle{
@@ -77,6 +94,7 @@ ul {
 .square.enable .circle.turn1 {
   background-color: black;
 }
+
 .square.enable .circle.turn2 {
   background-color: white;
 }
@@ -91,4 +109,19 @@ ul {
 
 .square.before{
   border: 2px solid rgb(255, 0, 0);
+}
+
+.cellstatus{
+width:100%;
+	  text-align:right;
+	position:absolute;
+font-size:small;
+margin:0px;
+padding:0px;
+}
+.cellstatus.white{
+color:white;
+}
+.cellstatus.black{
+color:black;
 }

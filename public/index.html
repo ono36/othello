@@ -17,14 +17,18 @@
   ></div>
   オセロ
   <div id="root"></div>
+  <br>
   <div id="menu">
-	  <select id="mode">
-		  <option value="1">CPU A(ランダム)</option>
-		  <option value="2">CPU B(謙虚)</option>
-		  <option value="3">CPU C(貪欲)</option>
+	CPU思考ルーチン<select id="mode">
+		  <option value="1">ランダム</option>
+		  <option value="2">少く取れる場所優先</option>
+		  <option value="3">多く取れる場所優先</option>
+		  <option value="4" >多く取れる+角優先</option>
+		  <option value="5" >少優先→多優先</option>
+		  <option value="6" selected >手数制限優先</option>
 		  <option value="0">対人</option>
 	  </select>
-	  <button id="reset">リセット</button>
 	</div>
+	<button id="reset">盤面リセット</button>
 </body>
 

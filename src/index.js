@@ -4,7 +4,8 @@ import "./styles.css";
 
 var _squares;
 var turn = 1;
-var mode = 0;
+var total_turn = 0;
+var mode = 2;
 var board;
 var winner=0;
 var before=-1;
@@ -28,8 +29,17 @@ class Square extends React.Component {
 	if (this.props.before) {
 		  css += " before";
 	}
+	var score=board.evaluation(this.props.idx,turn,_squares);
+	if (!this.props.enable) {
+		score="";
+	}
+	var color="black;"
+    if (turn === 2) {
+     color= "white";
+    }
     return (
       <div className={`square ${css}`} onClick={() => this.props.onClick()}>
+        <p className={`cellstatus ${color}`}>{score}</p>
         <p className={`circle ${a} turn${turn}`} />
       </div>
     );
@@ -37,6 +47,9 @@ class Square extends React.Component {
 }
 function reset() {
 	before=-1;
+	   winner=0;
+  var combo = document.getElementById("mode");
+  mode = parseInt(combo.value);
 
   _squares.fill(0);
   _squares[8 * 3 + 3] = 1;
@@ -44,9 +57,6 @@ function reset() {
   _squares[8 * 3 + 4] = 2;
   _squares[8 * 4 + 3] = 2;
   turn = 1;
-  var combo = document.getElementById("mode");
-  mode = parseInt(combo.value);
-  console.log(mode);
   board.forceUpdate();
 }
 class Board extends React.Component {
@@ -81,10 +91,11 @@ class Board extends React.Component {
   }
   put(i){
 	  interval=1;
-	  window.setTimeout(()=>{
-			  interval=0;
-  board.forceUpdate();
-			  },1000);
+//	  window.setTimeout(()=>{
+//			  interval=0;
+//  board.forceUpdate();
+//			  },1000);
+	  total_turn++;
     var color = turn;
 	before=i;
 	var squares = this.state.squares;
@@ -103,15 +114,17 @@ class Board extends React.Component {
 		  break;
 	  }
     }
+  var combo = document.getElementById("mode");
+  mode = parseInt(combo.value);
 
 	//置ける場合はターン交代する
 	if(enable){
 		//ターン交代
 		turn = 3 - turn;
 	}else{
-		//置け場合はターン交代しない
+		//置ける場合はターン交代しない
 
-		//再度置ける過チェック
+		//再度置けるかチェック
 		enable=false;
 		for (let i = 0; i < 8 * 8; i++) {
 		  if(check(i,turn,this.state.squares)){
@@ -121,7 +134,7 @@ class Board extends React.Component {
 		}
 
 		if(!enable){
-			//置け無い場合は終了
+			//置けない場合は終了
 			window.setTimeout(this.end,100);
 		}
 	}
@@ -132,30 +145,80 @@ class Board extends React.Component {
     }
   }
 
-  cpu(){
-	  var enables=[];
-	for (let i = 0; i < 8 * 8; i++) {
+  //全ての手を評価
+  evaluation(i,turn,_squares){
 	  var count=check(i,turn,_squares);
-	  if(count){
-		  enables.push({pos:i,count:count});
+		var test_squares =_squares.concat();
+    var color = turn;
+     check(i, color, test_squares, true);
+	color = 3 - turn;
+	var te = 0;
+	for (let j = 0; j < 8 * 8; j++) {
+    	var cnt = check(j, color, test_squares);
+	  if(cnt){
+		  te++;
 	  }
 	}
-	enables.sort((a,b)=>{
-			return a.count-b.count;
-			});
-	var target=enables[0].pos;
+
+	  var kado = this.kado(i);
+	  var time = total_turn/64;
+	  var kado_ratio = 0;
+	  var count_ratio = 0;
+	  var te_ratio= 0;
+	  var etc = 0;
+
 	  switch(mode){
 	 case 1:
-		 var random = (Math.random()*enables.length)|0;
-		 target= enables[random].pos;
+		 etc = (Math.random()*64|0);
 		 break;
 	 case 2:
-		 target= enables[0].pos;
+		 count_ratio = -1;
 		 break;
 	 case 3:
-		 target = enables[enables.length-1].pos;
+		 count_ratio = 1;
+		 break;
+	 case 4:
+		 count_ratio = 1;
+		 kado_ratio = 10;
+		 break;
+	 case 5:
+		 if(time<0.5){
+		 	count_ratio = -1;
+		}else{
+		 	count_ratio = 1;
+		}
+		 kado_ratio = 1;
+		 break;
+	 case 6:
+		 te_ratio=-1;
 		 break;
 	  }
+	count = count * count_ratio
+		+ kado * kado_ratio
+		+ te * te_ratio 
+		+ etc;
+
+	  return count|0;
+  }
+  //角かどうか判定
+  kado(i){
+	  if(i===0 || i===7 || i === 8*7 || i=== 8*7+7){
+		  return 1;
+	  }
+	  return 0;
+  }
+  cpu(){
+	 var enables=[];
+	for (let i = 0; i < 8 * 8; i++) {
+      var cnt = check(i, turn, _squares);
+	  if(!cnt)continue;
+	  var count=this.evaluation(i,turn,_squares);
+	  enables.push({pos:i,count:count});
+	}
+	enables.sort((a,b)=>{
+			return b.count-a.count;
+			});
+	var target=enables[0].pos;
 	this.put(target);
   }
   end(){
@@ -180,7 +243,7 @@ class Board extends React.Component {
         enable={check(i, color, this.state.squares)}
         before={i==before}
         value={this.state.squares[i]}
-        key={i}
+        idx={i}
         onClick={() => this.handleClick(i)}
       />
     );
@@ -206,6 +269,7 @@ class Board extends React.Component {
         <div className="board-row">{items}</div>
         <div className="status2">黒個数:{count(1)}</div>
         <div className="status2">白個数:{count(2)}</div>
+        <div className="status2">総ターン数:{total_turn}</div>
       </div>
     );
   }
