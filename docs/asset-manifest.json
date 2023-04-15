@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/othello/static/css/main.e01ec66c.css",
-    "main.js": "/othello/static/js/main.19aea2f8.js",
+    "main.css": "/othello/static/css/main.cfcdffaf.css",
+    "main.js": "/othello/static/js/main.aeb2698c.js",
     "index.html": "/othello/index.html",
-    "main.e01ec66c.css.map": "/othello/static/css/main.e01ec66c.css.map",
-    "main.19aea2f8.js.map": "/othello/static/js/main.19aea2f8.js.map"
+    "main.cfcdffaf.css.map": "/othello/static/css/main.cfcdffaf.css.map",
+    "main.aeb2698c.js.map": "/othello/static/js/main.aeb2698c.js.map"
   },
   "entrypoints": [
-    "static/css/main.e01ec66c.css",
-    "static/js/main.19aea2f8.js"
+    "static/css/main.cfcdffaf.css",
+    "static/js/main.aeb2698c.js"
   ]
 }
